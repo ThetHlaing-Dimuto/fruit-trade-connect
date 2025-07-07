@@ -29,7 +29,7 @@ A modern, AI-powered business intelligence dashboard and trading platform for gl
    - Create a `.env` file in the root with:
      ```env
      VITE_API_BASE_URL=http://localhost:3001
-     VITE_FRONTEND_URL=http://localhost:5173
+     FRONTEND_BASE_URL=http://localhost:5173
      ```
    - (Optional) Add any API keys or secrets as needed.
 4. **Start the backend:**
@@ -61,7 +61,7 @@ You can host this app for free using:
 
 ```env
 VITE_API_BASE_URL=http://localhost:3001                # URL of your backend API
-VITE_FRONTEND_URL=http://localhost:5173                # URL of your frontend (for CORS)
+FRONTEND_BASE_URL=http://localhost:5173                # URL of your frontend (for CORS)
 GOOGLE_CLOUD_PROJECT=your-google-cloud-project-id      # Google Cloud project ID for Vertex AI
 GOOGLE_APPLICATION_CREDENTIALS=google-service-account.json # Path to your Google service account JSON file
 ```

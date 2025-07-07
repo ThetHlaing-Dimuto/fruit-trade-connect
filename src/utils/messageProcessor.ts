@@ -1,4 +1,4 @@
-import { availableFruits, availableCountries, availableCertifications } from '../data/mockData';
+// (Removed unused imports)
 
 interface ProcessedMessage {
   content: string;
@@ -54,6 +54,8 @@ function extractBuyerInfoFromText(text: string) {
   return null;
 }
 
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+
 export const processMessage = async (message: string): Promise<ProcessedMessage> => {
   // Intercept "add supplier" intent
   if (/add supplier|create supplier/i.test(message)) {
@@ -67,14 +69,13 @@ If any field is missing, use null or an empty array.
 Message: "${message}"
 `;
     try {
-      const response = await fetch('http://localhost:3001/api/vertexChat', {
+      const response = await fetch(`${apiBaseUrl}/api/vertexChat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: extractionPrompt }),
       });
       const data = await response.json();
-      let jsonText = data.content;
-      jsonText = jsonText.replace(/```json|```/g, '').trim();
+      const jsonText = data.content.replace(/```json|```/g, '').trim();
       const match = jsonText.match(/\{[\s\S]*\}/);
       if (match) {
         const extracted = JSON.parse(match[0]);
@@ -101,13 +102,13 @@ Message: "${message}"
         const fallbackPrompt = `
 Just respond with a JSON object with keys: name, country, fruits (as an array). No explanation, no markdown, no template, just JSON. Message: "${message}"
 `;
-        const fallbackResponse = await fetch('http://localhost:3001/api/vertexChat', {
+        const fallbackResponse = await fetch(`${apiBaseUrl}/api/vertexChat`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: fallbackPrompt }),
         });
         const fallbackData = await fallbackResponse.json();
-        let fallbackJson = fallbackData.content.replace(/```json|```/g, '').trim();
+        const fallbackJson = fallbackData.content.replace(/```json|```/g, '').trim();
         const fallbackMatch = fallbackJson.match(/\{[\s\S]*\}/);
         if (fallbackMatch) {
           const extracted = JSON.parse(fallbackMatch[0]);
@@ -162,14 +163,13 @@ If any field is missing, use null or an empty array.
 Message: "${message}"
 `;
     try {
-      const response = await fetch('http://localhost:3001/api/vertexChat', {
+      const response = await fetch(`${apiBaseUrl}/api/vertexChat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: extractionPrompt }),
       });
       const data = await response.json();
-      let jsonText = data.content;
-      jsonText = jsonText.replace(/```json|```/g, '').trim();
+      const jsonText = data.content.replace(/```json|```/g, '').trim();
       const match = jsonText.match(/\{[\s\S]*\}/);
       if (match) {
         const extracted = JSON.parse(match[0]);
@@ -197,13 +197,13 @@ Message: "${message}"
         const fallbackPrompt = `
 Just respond with a JSON object with keys: name, country, fruits (as an array). No explanation, no markdown, no template, just JSON. Message: "${message}"
 `;
-        const fallbackResponse = await fetch('http://localhost:3001/api/vertexChat', {
+        const fallbackResponse = await fetch(`${apiBaseUrl}/api/vertexChat`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: fallbackPrompt }),
         });
         const fallbackData = await fallbackResponse.json();
-        let fallbackJson = fallbackData.content.replace(/```json|```/g, '').trim();
+        const fallbackJson = fallbackData.content.replace(/```json|```/g, '').trim();
         const fallbackMatch = fallbackJson.match(/\{[\s\S]*\}/);
         if (fallbackMatch) {
           const extracted = JSON.parse(fallbackMatch[0]);
@@ -248,7 +248,7 @@ Just respond with a JSON object with keys: name, country, fruits (as an array). 
 
   // Otherwise, call the Express Vertex AI backend API
   try {
-    const response = await fetch('http://localhost:3001/api/vertexChat', {
+    const response = await fetch(`${apiBaseUrl}/api/vertexChat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message }),
@@ -257,8 +257,26 @@ Just respond with a JSON object with keys: name, country, fruits (as an array). 
       throw new Error('Failed to get response from Vertex AI');
     }
     const data = await response.json();
-    return { content: data.content };
-  } catch (error) {
+    const jsonText = data.content.replace(/```json|```/g, '').trim();
+    const match = jsonText.match(/\{[\s\S]*\}/);
+    if (match) {
+      const extracted = JSON.parse(match[0]);
+      const name = extracted.name || null;
+      const fruits = Array.isArray(extracted.fruits) ? extracted.fruits : [];
+      if (name && fruits.length > 0) {
+        return {
+          content: `Sorry, I couldn't extract all details, but I've created a new profile for ${name}. They're interested in ${fruits.join(', ')}.`,
+          action: 'add_buyer',
+          data: {
+            name,
+            country: '',
+            fruitsInterested: fruits,
+          }
+        };
+      }
+    }
+    return { content: 'Sorry, there was an error connecting to the AI service.' };
+  } catch {
     return { content: 'Sorry, there was an error connecting to the AI service.' };
   }
 };

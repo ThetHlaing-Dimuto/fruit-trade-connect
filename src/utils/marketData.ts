@@ -39,6 +39,8 @@ const pricePredictionCache: Record<string, {
 }> = {};
 const CACHE_DURATION_MS = 10 * 60 * 1000; // 10 minutes
 
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+
 export async function getRecentFruitPrices(fruit: string): Promise<{date: string, price: number}[]> {
   const key = fruit.toLowerCase();
   if (mockPrices[key]) {
@@ -140,7 +142,7 @@ The predicted price for next week is $${predicted.toFixed(2)} per kg.
 Explain the main factors that could affect this price, and provide a confidence score (0-100) for this prediction. Respond in 2-3 sentences.
 `;
   try {
-    const response = await fetch('http://localhost:3001/api/vertexChat', {
+    const response = await fetch(`${apiBaseUrl}/api/vertexChat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: prompt }),
@@ -179,7 +181,7 @@ Assume all prices and quantities are per kg.
 Respond in 3-5 sentences, clearly mentioning EU, US, and general best practices.
 `;
   try {
-    const response = await fetch('http://localhost:3001/api/vertexChat', {
+    const response = await fetch(`${apiBaseUrl}/api/vertexChat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: prompt }),
@@ -193,7 +195,7 @@ Respond in 3-5 sentences, clearly mentioning EU, US, and general best practices.
 
 export async function fetchGivvableCertifications({ name }: { name: string }): Promise<{ categories: string[]; credentialCount: number; raw?: unknown }> {
   // Call backend proxy endpoint
-  const url = 'http://localhost:3001/api/givvableCerts';
+  const url = `${apiBaseUrl}/api/givvableCerts`;
   try {
     const response = await fetch(url, {
       method: 'POST',
