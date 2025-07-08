@@ -275,7 +275,7 @@ Just respond with a JSON object with keys: name, country, fruits (as an array). 
         };
       }
     }
-    return { content: 'Sorry, there was an error connecting to the AI service.' };
+    return { content: data.content };
   } catch {
     return { content: 'Sorry, there was an error connecting to the AI service.' };
   }

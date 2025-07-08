@@ -28,7 +28,15 @@ export const Chatbot: React.FC<ChatbotProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesEndRef.current) {
+      const container = messagesEndRef.current.parentElement;
+      if (container) {
+        const scrollHeight = container.scrollHeight;
+        const clientHeight = container.clientHeight;
+        const scrollTop = scrollHeight - clientHeight - 20; // Scroll 20px up from bottom
+        container.scrollTo({ top: scrollTop, behavior: 'smooth' });
+      }
+    }
   };
 
   useEffect(() => {
